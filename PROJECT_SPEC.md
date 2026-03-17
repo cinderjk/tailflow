@@ -4,13 +4,13 @@
 Membangun SaaS Page Builder berbasis Tailwind CSS yang berjalan 100% di infrastruktur Cloudflare (Edge).
 
 ## Tech Stack
-- **Framework**: Next.js (Edge Runtime)
-- **Host**: Cloudflare Pages
+- **Framework**: Astro 5 (Cloudflare Adapter)
+- **Host**: Cloudflare Workers (deploy via Wrangler)
 - **Database**: Cloudflare D1 (SQLite)
 - **Storage**: Cloudflare R2
 - **ORM**: Drizzle ORM
 - **Editor**: GrapesJS + grapesjs-tailwind plugin
-- **Auth**: Auth.js (NextAuth) dengan D1 Adapter
+- **Auth**: Auth.js (`@auth/core`) dengan adapter berbasis Drizzle/D1
 
 ## Core Features
 - Drag-and-drop komponen Tailwind CSS.

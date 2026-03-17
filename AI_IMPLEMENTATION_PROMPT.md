@@ -4,26 +4,40 @@
 Gunakan `PROJECT_SPEC.md` dan `DATABASE_SCHEMA.md` sebagai panduan utama. Bangun pondasi aplikasi dengan mengikuti langkah berikut:
 
 ## Step 1: Project Initialization
-1. Jalankan `npm create cloudflare@latest` untuk Next.js project.
-2. Setup `wrangler.toml` dengan binding D1 dan R2.
-3. Install dependencies: `grapesjs`, `grapesjs-tailwind`, `drizzle-orm`, `@auth/core`.
+1. Validasi `wrangler.json` agar binding sesuai dengan `DATABASE_SCHEMA.md`:
+	- D1 binding: `tailflowdb`
+	- R2 binding: `tailflowr2`
+2. Install dependencies untuk phase 1:
+	- `grapesjs`
+	- `grapesjs-tailwind`
+	- `drizzle-orm`
+	- `drizzle-kit`
+	- `@auth/core`
 
 ## Step 2: Database Setup
 1. Buat folder `/db` dan definisikan skema Drizzle untuk tabel `projects`.
-2. Generate migrasi pertama dan berikan perintah untuk menjalankannya via wrangler.
+2. Buat file konfigurasi Drizzle (`drizzle.config.ts`) dan set output migrasi.
+3. Generate migrasi pertama.
+4. Berikan perintah apply migrasi ke D1 (local dan remote) menggunakan Wrangler.
 
 ## Step 3: Core Editor Page
-1. Buat Route `/editor/[id]` (Client Component).
-2. Inisialisasi GrapesJS di dalam `useEffect`.
-3. Tambahkan tombol "Save" yang mengirimkan `editor.getProjectData()` ke API Route `/api/projects/[id]`.
+1. Buat route Astro: `src/pages/editor/[id].astro`.
+2. Render container editor di halaman tersebut dan inisialisasi GrapesJS di client-side script.
+3. Tambahkan tombol "Save" yang mengirimkan `editor.getProjectData()` ke endpoint `POST /api/projects/[id]`.
 
 ## Step 4: API Routes (Edge Runtime)
-1. Buat API Route POST `/api/projects/[id]` yang berjalan di Edge Runtime.
-2. Gunakan binding `process.env.DB` untuk menyimpan data JSON ke D1.
+1. Buat endpoint Astro di `src/pages/api/projects/[id].ts`.
+2. Gunakan env binding Cloudflare D1 `tailflowdb` untuk menyimpan data JSON ke tabel `projects`.
+3. Gunakan method `POST` untuk create/update data project berdasarkan `id`.
 
 ## Kriteria Teknis
 - Gunakan TypeScript Strict Mode.
-- Pastikan semua API Route memiliki `export const runtime = 'edge'`.
-- UI menggunakan Tailwind CSS dan Shadcn/UI.
+- Gunakan pola Astro + Cloudflare adapter untuk runtime Edge.
+- UI menggunakan Tailwind CSS.
+- Struktur minimal yang harus dibuat:
+  - `src/pages/editor/[id].astro`
+  - `src/pages/api/projects/[id].ts`
+  - `db/schema.ts`
+  - `drizzle.config.ts`
 
-Berikan struktur folder dan file `wrangler.toml` terlebih dahulu sebelum menulis kode lainnya.
+Berikan struktur folder terlebih dahulu, lalu lanjutkan implementasi file di atas secara bertahap.

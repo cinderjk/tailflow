@@ -15,8 +15,24 @@ CREATE TABLE projects (
 
 ## Cloudflare R2 (Storage Logic)
 - **Path**: `buckets/user-assets/[user_id]/[file_name]`
-- **Public URL**: Menggunakan custom domain atau R2.dev untuk akses gambar di dalam canvas.
+- **Public URL**: `https://pub-1269ff3669224e919a7b149c0e108f86.r2.dev`
 
-## Environment Bindings (wrangler.toml)
-- `[[d1_databases]]`: binding = "DB"
-- `[[r2_buckets]]`: binding = "BUCKET"
+## Environment Bindings (wrangler.json)
+- `d1_databases[0].binding`: `tailflowdb`
+- `r2_buckets[0].binding`: `tailflowr2`
+
+Contoh struktur di `wrangler.json`:
+```json
+{
+  "d1_databases": [
+    {
+      "binding": "tailflowdb"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "tailflowr2"
+    }
+  ]
+}
+```
