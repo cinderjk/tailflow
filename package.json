@@ -16,13 +16,18 @@
 		"@astrojs/mdx": "4.3.13",
 		"@astrojs/rss": "4.0.14",
 		"@astrojs/sitemap": "3.6.1",
+		"@auth/core": "^0.34.3",
 		"astro": "5.16.9",
+		"drizzle-orm": "^0.45.1",
+		"grapesjs": "^0.22.14",
+		"grapesjs-tailwind": "^1.0.13",
 		"typescript": "5.9.3"
 	},
 	"devDependencies": {
 		"@tailwindcss/vite": "^4.2.1",
+		"drizzle-kit": "^0.31.9",
 		"tailwindcss": "^4.2.1",
-		"wrangler": "4.56.0"
+		"wrangler": "^4.74.0"
 	},
 	"engines": {
 		"node": ">=22"
@@ -33,6 +38,9 @@
 		"build": "astro build",
 		"cf-typegen": "wrangler types",
 		"check": "astro build && tsc && wrangler deploy --dry-run",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate:local": "wrangler d1 migrations apply tailflow --local",
+		"db:migrate:remote": "wrangler d1 migrations apply tailflow --remote",
 		"deploy": "wrangler deploy",
 		"dev": "astro dev",
 		"preview": "astro build && wrangler dev"

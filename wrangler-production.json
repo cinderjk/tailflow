@@ -11,7 +11,8 @@
 		{
 			"binding": "tailflowdb",
 			"database_name": "tailflow",
-			"database_id": "9b3fdeea-7d8b-451c-8f57-1b4afc0cc37c"
+			"database_id": "9b3fdeea-7d8b-451c-8f57-1b4afc0cc37c",
+			"migrations_dir": "drizzle"
 		}
 	],
 	"r2_buckets": [

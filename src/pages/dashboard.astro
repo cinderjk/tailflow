@@ -1,0 +1,149 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+
+const pageTitle = 'Dashboard';
+const pageDescription = 'Dasbor sederhana TailFlow untuk melihat daftar project dan membuat halaman baru.';
+---
+
+<!doctype html>
+<html lang="id">
+	<head>
+		<BaseHead title={`${pageTitle} | ${SITE_TITLE}`} description={pageDescription} />
+	</head>
+	<body class="min-h-screen bg-slate-50">
+		<Header />
+		<main class="mx-auto max-w-6xl px-6 py-10 md:px-10 md:py-14">
+			<section class="rounded-3xl border border-cyan-200/70 bg-white/90 p-8 shadow-sm">
+				<div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+					<div>
+						<p class="inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-1 text-sm font-semibold text-cyan-800">
+							TailFlow Dashboard
+						</p>
+						<h1 class="mt-4 text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">Daftar Halaman</h1>
+						<p class="mt-2 text-slate-600">Kelola halaman yang sudah dibuat dan lanjutkan editing dari daftar ini.</p>
+					</div>
+					<button
+						id="create-page"
+						class="inline-flex h-fit rounded-xl bg-cyan-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-cyan-800"
+					>
+						Buat Halaman Baru
+					</button>
+				</div>
+			</section>
+
+			<section class="mt-6 rounded-3xl border border-slate-200 bg-white shadow-sm">
+				<div id="dashboard-status" class="border-b border-slate-200 px-6 py-4 text-sm text-slate-500">
+					Memuat daftar project...
+				</div>
+				<ul id="project-list" class="divide-y divide-slate-100"></ul>
+			</section>
+		</main>
+		<Footer />
+
+		<script>
+			// @ts-nocheck
+			const createButton = document.getElementById('create-page');
+			const statusElement = document.getElementById('dashboard-status');
+			const listElement = document.getElementById('project-list');
+			let currentItems = /** @type {Array<{id: string, name: string, updatedAt?: number | null}>} */ ([]);
+
+			const renderItems = () => {
+				if (!(listElement instanceof HTMLUListElement)) {
+					return;
+				}
+
+				if (!Array.isArray(currentItems) || currentItems.length === 0) {
+					listElement.innerHTML =
+						'<li class="px-6 py-8 text-sm text-slate-500">Belum ada project. Klik "Buat Halaman Baru" untuk memulai.</li>';
+					return;
+				}
+
+				listElement.innerHTML = currentItems
+					.map(
+						(item) => `
+							<li class="flex flex-col gap-3 px-6 py-4 md:flex-row md:items-center md:justify-between">
+								<div>
+									<p class="text-base font-semibold text-slate-900">${item.name}</p>
+									<p class="text-sm text-slate-500">ID: ${item.id}</p>
+									<p class="mt-1 text-xs text-slate-400">Update terakhir: ${item.updatedAt ? new Date(item.updatedAt * 1000).toLocaleString('id-ID') : '-'}</p>
+								</div>
+								<a href="/editor/${item.id}" class="inline-flex rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-cyan-400 hover:text-cyan-700">
+									Buka Editor
+								</a>
+							</li>
+						`,
+					)
+					.join('');
+			};
+
+			const loadProjects = async () => {
+				if (statusElement) {
+					statusElement.textContent = 'Memuat daftar project...';
+				}
+
+				try {
+					const response = await fetch('/api/projects');
+					if (!response.ok) {
+						throw new Error(`Gagal memuat daftar project (${response.status})`);
+					}
+
+					const payload = await response.json();
+					const items =
+						payload && typeof payload === 'object' && 'items' in payload && Array.isArray(payload.items)
+							? payload.items
+							: [];
+					currentItems = items;
+					renderItems();
+					if (statusElement) {
+						statusElement.textContent = `Total project: ${items.length}`;
+					}
+				} catch (error) {
+					if (statusElement) {
+						statusElement.textContent = error instanceof Error ? error.message : 'Gagal memuat dashboard.';
+					}
+				}
+			};
+
+			if (createButton instanceof HTMLButtonElement) {
+				createButton.addEventListener('click', async () => {
+					createButton.disabled = true;
+					createButton.textContent = 'Membuat...';
+
+					try {
+						const response = await fetch('/api/projects', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ name: 'Untitled Project', userId: 'demo-user' }),
+						});
+
+						if (!response.ok) {
+							throw new Error(`Gagal membuat project (${response.status})`);
+						}
+
+						const payload = await response.json();
+						const editorUrl =
+							payload && typeof payload === 'object' && 'editorUrl' in payload ? payload.editorUrl : null;
+						if (typeof editorUrl === 'string' && editorUrl) {
+							window.location.href = editorUrl;
+							return;
+						}
+
+						await loadProjects();
+					} catch (error) {
+						if (statusElement) {
+							statusElement.textContent = error instanceof Error ? error.message : 'Gagal membuat project baru.';
+						}
+					} finally {
+						createButton.disabled = false;
+						createButton.textContent = 'Buat Halaman Baru';
+					}
+				});
+			}
+
+			void loadProjects();
+		</script>
+	</body>
+</html>

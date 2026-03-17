@@ -6,6 +6,8 @@ import tailwindcss from "@tailwindcss/vite";
 
 import cloudflare from "@astrojs/cloudflare";
 
+const enablePlatformProxy = process.env.ASTRO_PLATFORM_PROXY === "true";
+
 // https://astro.build/config
 export default defineConfig({
 	site: "https://example.com",
@@ -14,8 +16,13 @@ export default defineConfig({
 		plugins: [tailwindcss()],
 	},
 	adapter: cloudflare({
-		platformProxy: {
-			enabled: false,
-		},
+		platformProxy: enablePlatformProxy
+			? {
+				enabled: true,
+				configPath: "wrangler.json",
+			}
+			: {
+				enabled: false,
+			},
 	}),
 });
