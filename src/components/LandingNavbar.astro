@@ -1,0 +1,18 @@
+---
+interface Props {
+	brand: string;
+}
+
+const { brand } = Astro.props;
+---
+
+<header class="mb-8 rounded-2xl border border-slate-200/80 bg-white/80 px-5 py-4 shadow-sm backdrop-blur md:mb-10 md:px-7">
+	<nav class="flex items-center justify-between gap-4">
+		<a href="/" class="text-xl font-bold tracking-tight text-slate-900">{brand}</a>
+		<div class="flex items-center gap-2 text-sm font-medium text-slate-600">
+			<a href="#fitur" class="rounded-lg px-3 py-2 transition hover:bg-cyan-50 hover:text-cyan-700">Fitur</a>
+			<a href="#stack" class="rounded-lg px-3 py-2 transition hover:bg-cyan-50 hover:text-cyan-700">Stack</a>
+			<a href="#mulai" class="rounded-lg bg-slate-900 px-4 py-2 text-white transition hover:bg-slate-700">Mulai</a>
+		</div>
+	</nav>
+</header>
