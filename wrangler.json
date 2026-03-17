@@ -21,9 +21,6 @@
 			"bucket_name": "assets"
 		}
 	],
-	"kv_namespaces": [
-		{ "binding": "SESSION", "id": "SESSION" }
-	],
 	"observability": {
 		"enabled": true
 	},
