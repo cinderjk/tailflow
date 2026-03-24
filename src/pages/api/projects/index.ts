@@ -137,13 +137,36 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		);
 	}
 
-	await db.insert(projects).values({
-		id,
-		name,
-		userId,
-		createdAt: timestamp,
-		updatedAt: timestamp,
-	});
+	try {
+		await db.insert(projects).values({
+			id,
+			name,
+			userId,
+			createdAt: timestamp,
+			updatedAt: timestamp,
+		});
+	} catch (error) {
+		const message = getErrorMessage(error);
+		const likelySchemaError = isLikelySchemaError(message);
+
+		console.error('Failed to create project in D1', {
+			error: message,
+			likelySchemaError,
+		});
+
+		return new Response(
+			JSON.stringify({
+				success: false,
+				error: likelySchemaError
+					? 'Database schema is not ready. Run remote migrations with `npm.cmd run db:migrate:remote` and redeploy.'
+					: 'Failed to create project in database.',
+			}),
+			{
+				status: 500,
+				headers: { 'Content-Type': 'application/json' },
+			},
+		);
+	}
 
 	return new Response(
 		JSON.stringify({
