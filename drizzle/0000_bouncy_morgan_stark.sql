@@ -1,4 +1,4 @@
-CREATE TABLE `projects` (
+CREATE TABLE IF NOT EXISTS `projects` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`data_json` text,
