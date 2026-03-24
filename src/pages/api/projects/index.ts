@@ -11,6 +11,24 @@ interface CreateProjectPayload {
 	userId?: string;
 }
 
+const getErrorMessage = (error: unknown) => {
+	if (error instanceof Error) {
+		return error.message;
+	}
+
+	return String(error);
+};
+
+const isLikelySchemaError = (message: string) => {
+	const lowered = message.toLowerCase();
+
+	return (
+		lowered.includes('no such table') ||
+		lowered.includes('no such column') ||
+		lowered.includes('failed query')
+	);
+};
+
 const getDbFromLocals = (locals: App.Locals) => {
 	const dbBinding = locals.runtime?.env?.tailflowdb;
 
@@ -39,21 +57,44 @@ export const GET: APIRoute = async ({ locals }) => {
 		});
 	}
 
-	const items = await db
-		.select({
-			id: projects.id,
-			name: projects.name,
-			userId: projects.userId,
-			createdAt: projects.createdAt,
-			updatedAt: projects.updatedAt,
-		})
-		.from(projects)
-		.orderBy(desc(projects.updatedAt));
+	try {
+		const items = await db
+			.select({
+				id: projects.id,
+				name: projects.name,
+				userId: projects.userId,
+				createdAt: projects.createdAt,
+				updatedAt: projects.updatedAt,
+			})
+			.from(projects)
+			.orderBy(desc(projects.updatedAt));
 
-	return new Response(JSON.stringify({ success: true, items }), {
-		status: 200,
-		headers: { 'Content-Type': 'application/json' },
-	});
+		return new Response(JSON.stringify({ success: true, items }), {
+			status: 200,
+			headers: { 'Content-Type': 'application/json' },
+		});
+	} catch (error) {
+		const message = getErrorMessage(error);
+		const likelySchemaError = isLikelySchemaError(message);
+
+		console.error('Failed to query projects from D1', {
+			error: message,
+			likelySchemaError,
+		});
+
+		return new Response(
+			JSON.stringify({
+				success: false,
+				error: likelySchemaError
+					? 'Database schema is not ready. Run remote migrations with `npm.cmd run db:migrate:remote` and redeploy.'
+					: 'Failed to query projects from database.',
+			}),
+			{
+				status: 500,
+				headers: { 'Content-Type': 'application/json' },
+			},
+		);
+	}
 };
 
 export const POST: APIRoute = async ({ request, locals }) => {
